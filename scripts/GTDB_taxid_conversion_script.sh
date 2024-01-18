@@ -1,11 +1,12 @@
 ###########################################################
 # This software was created on 16.01.2024                 #
-# By:                                                     #
-# Mads Reinhold Jensen and Daniel Kumazawa Morais.        #
+# By: Mads Reinholdt Jensen and Daniel Kumazawa Morais.   #
+# Contact: daniel.morais@uit.no                           #
 #                                                         #
 # It starts from a GTDB fasta file and uses it's taxonomy # 
 # information in it's headers to generate a table of GTDB #
 # accession and a TaxID value from NCBI.                  #
+#                                                         #
 # This is usefull to rely on the NCBI's taxonomy strucure #
 # backbone when processing data from databases other      #
 # than NCBI.                                              #
