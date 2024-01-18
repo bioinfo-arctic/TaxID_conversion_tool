@@ -16,23 +16,15 @@
 #                                                         #
 ###########################################################
 
-grep '^>' ar53_ssu_reps_r207.fna | cut -d ' ' -f1 | sed 's/>//g' > ar53.accessions.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f7 | sed 's/s__//g' > ar53.species.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f6 | sed 's/g__//g' > ar53.genus.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f5 | sed 's/f__//g' > ar53.family.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f4 | sed 's/o__//g' > ar53.order.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f3 | sed 's/c__//g' > ar53.class.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f2 | sed 's/p__//g' > ar53.phylum.txt
-grep '^>' ar53_ssu_reps_r207.fna | cut -d '[' -f1 | cut -d ';' -f1 | sed 's/.*d__//g' > ar53.domain.txt
- 
-taxonkit name2taxid ar53.species.txt > col1.txt
-taxonkit name2taxid ar53.genus.txt > col2.txt
-taxonkit name2taxid ar53.family.txt > col3.txt
-taxonkit name2taxid ar53.order.txt > col4.txt
-taxonkit name2taxid ar53.class.txt > col5.txt
-taxonkit name2taxid ar53.phylum.txt > col6.txt
-taxonkit name2taxid ar53.domain.txt > col7.txt
- 
-echo -e "Accession\tSpecies\tGenus\tFamily\tOrder\tClass\tPhylum\tDomain" > header.txt
-paste ar53.accessions.txt col1.txt col2.txt col3.txt col4.txt col5.txt col6.txt col7.txt | cut -f1,3,5,7,9,11,13,15 > temp.txt
-cat header.txt temp.txt > Taxids_conversion_table.txt
+# For this script to work the starting fasta file must have the header with a structure similar to the line below:
+# >GB_GCA_000016605.1 d__Archaea;p__Thermoproteota;c__Thermoproteia;o__Sulfolobales;f__Sulfolobaceae;g__Metallosphaera;s__Metallosphaera sedula [locus_tag=CP000682.1] [location=1705272..1706766] [ssu_len=1494] [contig_len=2191517]
+# You also need taxonkit installed at your $HOME directory. For installation and usage of taxonkit, please see at:
+# https://github.com/shenwei356/taxonkit
+
+grep '^>' ../ar53_ssu_reps_r207.fna | sed 's/>//; s/;/\t/g' | awk 'BEGIN{print "Accession\tSpecies\tGenus\tFamily\tOrder\tClass\tPhylum\tDomain"}{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7}' > taxonomy_table_names.txt
+
+for i in {2..8}; do cut -f ${i} taxonomy_table_names.txt | tail -n +2 | sed 's/[a-z]__//' | ./taxonkit name2taxid --data-dir ../taxdump/ | cut -f 2 > col_${i}.txt ; done
+
+cat <(head -n 1 taxonomy_table_names.txt) <(paste <(tail -n +2 taxonomy_table_names.txt | cut -f 1) col_* ) > Taxids_conversion_table.txt
+
+awk '{print $1"\t"$2}' Taxids_conversion_table.txt > Final_GTDB_and_TaxID_table.txt
