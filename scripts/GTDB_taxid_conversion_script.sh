@@ -28,9 +28,9 @@
 # This command will create a taxonomy table
 grep '^>' $1 | sed 's/>//; s/;/\t/g' | awk 'BEGIN{print "Accession\tSpecies\tGenus\tFamily\tOrder\tClass\tPhylum\tDomain"}{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7}' > taxonomy_table_names.txt
 
-# This loop will generate 7 intermatiade files called col_[2-8].txt
+# This loop will generate 7 intermediate files called col_[2-8].txt
 # These files will be the TaxID for each of the taxonomical levels in the headers of your fasta file:  (s__, g__, f__, c__, o__, p__, d__) and they should have the same number of rows as the number of headers of your fasta file.
-for i in {2..8}; do cut -f ${i} taxonomy_table_names.txt | tail -n +2 | sed 's/[a-z]__//' | ./taxonkit name2taxid --data-dir ../taxdump/ | cut -f 2 > col_${i}.txt ; done
+for i in {2..8}; do cut -f ${i} taxonomy_table_names.txt | tail -n +2 | sed 's/[a-z]__//' | taxonkit name2taxid | cut -f 2 > col_${i}.txt ; done
 
 # This command will generaet a table of TaxIDs for each taxonomic level it could find using the taxonkit software. Your table should contain empty spaces, specially for the species column (s__), but shouldn't have gaps at the domain column (d__).
 cat <(head -n 1 taxonomy_table_names.txt) <(paste <(tail -n +2 taxonomy_table_names.txt | cut -f 1) col_* ) > Taxids_conversion_table.txt
